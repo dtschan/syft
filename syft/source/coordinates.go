@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/anchore/syft/internal/log"
 	"github.com/anchore/syft/syft/artifact"
 )
 
@@ -26,8 +27,14 @@ func NewCoordinateSet(start ...Coordinates) CoordinateSet {
 }
 
 func (c Coordinates) ID() artifact.ID {
-	id, _ := artifact.IDFromHash(c.RealPath)
-	return artifact.ID(id)
+	id, err := artifact.IDFromHash(c)
+	if err != nil {
+		// TODO: what to do in this case?
+		log.Warnf("unable to get fingerprint of location coordinate=%+v: %+v", c, err)
+		return ""
+	}
+
+	return id
 }
 
 func (c Coordinates) String() string {
